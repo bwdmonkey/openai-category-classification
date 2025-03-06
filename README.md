@@ -3,9 +3,9 @@ OpenAI based document category classification
 
 Supported Document Types:
 - png, jpeg, jpg, webp, gif, bmp
+- csv, xls, xlsx
 
 Future Document Types:
-- csv, xls, xlsx
 - doc, docx
 
 ## Setup

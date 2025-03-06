@@ -6,7 +6,7 @@ OpenAI vision-based category classification command-line interface.
 import argparse
 import os
 import glob
-from pathlib import Path
+import time
 
 from classifier import (
     process_file,
@@ -17,6 +17,8 @@ from classifier.utils import print_results, print_summary, generate_summary_repo
 
 def main():
     """Command-line interface for the classification system."""
+    start_time = time.time()
+
     parser = argparse.ArgumentParser(
         description="Classify files using OpenAI Vision and Language Models")
 
@@ -28,6 +30,8 @@ def main():
     single_parser.add_argument("--categories", nargs="+", help="List of categories to classify against")
     single_parser.add_argument("--output", help="Output directory for results")
     single_parser.add_argument("--save", action="store_true", help="Save results to output directory")
+    single_parser.add_argument("--threads", type=int, default=5,
+                              help="Maximum number of concurrent threads")
 
     # Batch classification
     batch_parser = subparsers.add_parser("batch", help="Classify all images in a directory")
@@ -39,6 +43,8 @@ def main():
     batch_parser.add_argument("--save", action="store_true", help="Save results to output directory")
     batch_parser.add_argument("--summary", action="store_true", help="Generate a summary report")
     batch_parser.add_argument("--summary-file", help="Path to save summary report")
+    batch_parser.add_argument("--threads", type=int, default=5,
+                             help="Maximum number of concurrent threads")
 
     # Advanced processing
     advanced_parser = subparsers.add_parser("advanced",
@@ -53,6 +59,8 @@ def main():
     advanced_parser.add_argument("--summary", action="store_true",
                                help="Generate a summary report")
     advanced_parser.add_argument("--summary-file", help="Path to save summary report")
+    advanced_parser.add_argument("--threads", type=int, default=5,
+                               help="Maximum number of concurrent threads")
 
     args = parser.parse_args()
 
@@ -128,7 +136,7 @@ def main():
         print(f"Found {len(all_files)} files to process")
 
         # Process all files
-        results = process_files(all_files)
+        results = process_files(all_files, max_workers=args.threads)
 
         # Print results
         for item in results:
@@ -198,7 +206,7 @@ def main():
         print(f"Found {len(all_files)} files to process")
 
         # Process all files
-        results = process_files(all_files)
+        results = process_files(all_files, max_workers=args.threads)
 
         # Print individual results
         for item in results:
@@ -213,6 +221,18 @@ def main():
                 print(f"Summary report saved to: {args.summary_file}")
     else:
         parser.print_help()
+
+    # Print elapsed time at the end
+    elapsed_time = time.time() - start_time
+    minutes, seconds = divmod(elapsed_time, 60)
+    hours, minutes = divmod(minutes, 60)
+
+    if hours > 0:
+        print(f"\nTotal processing time: {int(hours)}h {int(minutes)}m {seconds:.2f}s")
+    elif minutes > 0:
+        print(f"\nTotal processing time: {int(minutes)}m {seconds:.2f}s")
+    else:
+        print(f"\nTotal processing time: {seconds:.2f}s")
 
 if __name__ == "__main__":
     main()

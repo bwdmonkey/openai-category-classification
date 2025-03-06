@@ -1,10 +1,15 @@
 """
-OpenAI-based classification package.
-Provides utilities for categorizing various file types using AI.
+OpenAI category classification package.
 """
 
-from .core import classify_image, batch_classify, process_file, process_files
-from .models import Item
 from .config import Config
+from .core import batch_classify, process_file, process_files
+from .models import Item
 
-__all__ = ['classify_image', 'batch_classify', 'process_file', 'process_files', 'Item', 'Config']
+__all__ = [
+    'Config',
+    'batch_classify',
+    'process_file',
+    'process_files',
+    'Item'
+]
